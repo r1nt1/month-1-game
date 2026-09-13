@@ -3,12 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Month 1 game</title>
+    <meta name="theme-color" content="#191920" />
+    <title>Blocks</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
-    <p id="status" role="status">Loading…</p>
-    <canvas id="scene" aria-label="Game"></canvas>
+    <canvas id="scene" aria-label="Blocks stacking game"></canvas>
+    <header><span class="wordmark">BLOCKS</span><div id="counter" hidden><span>STACKED</span><strong id="score">0</strong></div></header>
+    <main id="overlay">
+      <section id="loading" role="status"><p class="eyebrow">ONE BLOCK AT A TIME</p><h1>Loading Blocks…</h1></section>
+      <section id="title" hidden><p class="eyebrow">ONE BLOCK AT A TIME</p><h1>Blocks<span>.</span></h1><button id="start">Start</button><p>Press Space Bar or Tap to begin</p></section>
+      <section id="paused" hidden><p class="eyebrow">TAKE YOUR TIME</p><h1>Paused</h1><button id="resume">Resume</button><p>Press Space, tap or S to resume</p></section>
+      <section id="gameover" hidden><p class="eyebrow">GAME OVER</p><h1>Score <span id="final-score">0</span></h1><button id="restart">Restart</button><p>Press Space or A to try again</p></section>
+      <section id="error" role="alert" hidden><p class="eyebrow">UNABLE TO START</p><h1>One moment.</h1><p id="error-message"></p><button id="retry">Retry</button></section>
+    </main>
+    <footer id="instructions" hidden><span>Tap / <kbd>Space</kbd> to stop the block</span><span><kbd>A</kbd> Restart <i>·</i> <kbd>S</kbd> Pause</span></footer>
+    <noscript>This game needs JavaScript enabled to run.</noscript>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
