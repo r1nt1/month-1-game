@@ -3,12 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Month 1 game</title>
+    <title>Blocks</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
     <p id="status" role="status">Loading…</p>
     <canvas id="scene" aria-label="Game"></canvas>
+    <div id="hud">
+      <p id="score" aria-live="polite" hidden>1</p>
+      <section id="title" hidden>
+        <h1>Blocks</h1>
+        <p>Press space or tap to start</p>
+      </section>
+      <section id="over" hidden>
+        <h1>Game over</h1>
+        <p id="final">Score 0</p>
+        <button id="restart" type="button">Restart</button>
+      </section>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

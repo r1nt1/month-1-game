@@ -1,0 +1,2 @@
+# Vercel CLI writes a login token here. The file is gitignored and never committed.
+.env.local:jwt:2
