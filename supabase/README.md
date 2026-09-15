@@ -21,11 +21,25 @@ in when that run started. Failed saves are reported and are not queued.
 
 ## Google setup
 
-The Google Cloud project `month-1-game` and web client `Blocks web` are created,
-and Google is enabled in Supabase. Local sign-in reaches Google’s account chooser.
-Completing sign-in and testing saved scores with a real player are still pending.
-No billing or trial was enabled. The local return URL below is configured;
-localhost, LAN, and deployed URLs are not configured yet.
+The Google Cloud project `month-1-game` and web client `Blocks web` are configured,
+and Google is enabled in Supabase. Local Google sign-in, profile creation, score
+saving, and leaderboard display have been observed with the `rinti` account.
+No billing or trial was enabled.
+
+Production configuration is prepared for `https://month-1-game.vercel.app`:
+- Google allows that JavaScript origin and the local `http://127.0.0.1:5181` origin.
+- Supabase's Site URL is `https://month-1-game.vercel.app/`.
+- Supabase allows `https://month-1-game.vercel.app/?auth=google` and
+  `http://127.0.0.1:5181/?auth=google` as exact redirects.
+- Vercel Production has `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, and
+  `VITE_GOOGLE_AUTH_READY=true`. No Google secret is stored in the frontend.
+
+Google remains in Testing status. Basic identity-only sign-in is exempt from the
+Google test-user allowlist restriction, according to
+https://developers.google.com/identity/protocols/oauth2/production-readiness/overview.
+The observed login request uses only email and profile. Verify public sign-in with
+another account and on a phone after deployment. The new game has not been pushed
+or deployed yet; these environment values apply to the next production build.
 
 For a fresh setup, create a Google Cloud project and a Web application OAuth client (the credentials
 that identify this game to Google). Use only basic identity scopes: openid, email,
@@ -38,7 +52,7 @@ in frontend code. Add each game return URL to Supabase's redirect allow list:
 `http://127.0.0.1:5181/?auth=google`, `http://localhost:5181/?auth=google`, and the
 exact deployed Vercel game URL with `/?auth=google` when deployment is approved.
 A phone needs its reachable LAN or deployed URL explicitly allowed too.
-Google test mode may require adding test users before they can sign in.
+If additional Google permissions are introduced later, reassess testing and verification requirements.
 
 Local configuration in `.env.local`:
 
@@ -55,8 +69,8 @@ approved. Email delivery is not used by this sign-in flow.
 
 Before release, test Google sign-in and cancellation, choosing a permanent name,
 a duplicate name, sign-out, score saving, and the top-five list with real accounts.
-Live Google sign-in has reached account selection; the user must complete consent
-and choose their own permanent display name before score-saving can be tested.
+Local sign-in and saved scores were verified. Public-domain sign-in remains an
+after-deployment check.
 Build/type/lint/audit checks and database tests do not replace those tests.
 
 The UI has loading, empty, and failure states. Game input is ignored while an
