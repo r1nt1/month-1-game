@@ -24,8 +24,8 @@ scene.add(light);
 const geometry = new BoxGeometry(1, 1, 1);
 const palette = ['#FFBF00', '#FF7F00', '#FF4040', '#D000A0', '#8A2BE2', '#4169E1', '#0000FF'].map(c => new Color(c));
 const height = .65;
-// Keep the full incoming block visible in the closer phone framing.
-const distance = 3.5;
+// 50% farther away; entrance may extend beyond phone edges.
+const distance = 5.25;
 const framingMagnification = 1.25;
 type Block = Mesh<BoxGeometry, MeshLambertMaterial>;
 let top: Block;
@@ -37,6 +37,7 @@ const falling: { mesh: Block; velocity: number; age: number }[] = [];
 
 function show(panel?: string) {
   for (const id of panels) element(id).hidden = id !== panel;
+  element('overlay').classList.toggle('score-focus', panel === 'gameover');
   element('counter').hidden = state === 'loading' || state === 'error' || state === 'title';
   element('instructions').hidden = state !== 'playing' || paused || fading;
 }
@@ -46,7 +47,7 @@ function fail(message: string) {
   show('error');
 }
 function colorAt(level: number) {
-  const progress = Math.min(level / 30, 1) * (palette.length - 1);
+  const progress = Math.min(level / 40, 1) * (palette.length - 1);
   const index = Math.min(Math.floor(progress), palette.length - 2);
   return palette[index].clone().lerp(palette[index + 1], progress - index);
 }
@@ -132,22 +133,18 @@ function primary() {
   else place();
 }
 element('start').addEventListener('click', primary);
-element('restart').addEventListener('click', begin);
-element('resume').addEventListener('click', resume);
+element('restart').addEventListener('click', () => { if (state === 'gameover') primary(); });
+element('resume').addEventListener('click', () => { if (paused) primary(); });
 element('retry').addEventListener('click', () => location.reload());
 document.addEventListener('pointerdown', event => {
   if (event.button !== 0 || !event.isPrimary || (event.target as HTMLElement).closest('button')) return;
-  if (state !== 'gameover') primary();
+  primary();
 });
 document.addEventListener('keydown', event => {
   if (event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
-  const key = event.key.toLowerCase();
-  if (![' ', 'a', 's'].includes(key)) return;
+  if (event.key !== ' ') return;
   event.preventDefault();
-  if (fading) return;
-  if (key === ' ') primary();
-  if (key === 'a' && (state === 'playing' || state === 'gameover')) begin();
-  if (key === 's' && state === 'playing') { if (paused) resume(); else pause(); }
+  primary();
 });
 document.addEventListener('visibilitychange', () => { pause(); });
 window.addEventListener('blur', pause);
