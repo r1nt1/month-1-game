@@ -19,9 +19,15 @@ it does not prevent a technically skilled player from submitting an invented sco
 The browser calls score submission only when a game ends, for the player signed
 in when that run started. Failed saves are reported and are not queued.
 
-## Google setup still required
+## Google setup
 
-Create a Google Cloud project and a Web application OAuth client (the credentials
+The Google Cloud project `month-1-game` and web client `Blocks web` are created,
+and Google is enabled in Supabase. Local sign-in reaches Google’s account chooser.
+Completing sign-in and testing saved scores with a real player are still pending.
+No billing or trial was enabled. The local return URL below is configured;
+localhost, LAN, and deployed URLs are not configured yet.
+
+For a fresh setup, create a Google Cloud project and a Web application OAuth client (the credentials
 that identify this game to Google). Use only basic identity scopes: openid, email,
 and profile. Configure this Supabase callback in Google's authorized redirect URIs:
 
@@ -49,7 +55,8 @@ approved. Email delivery is not used by this sign-in flow.
 
 Before release, test Google sign-in and cancellation, choosing a permanent name,
 a duplicate name, sign-out, score saving, and the top-five list with real accounts.
-Live Google sign-in has not yet been tested: Google Cloud account setup is pending.
+Live Google sign-in has reached account selection; the user must complete consent
+and choose their own permanent display name before score-saving can be tested.
 Build/type/lint/audit checks and database tests do not replace those tests.
 
 The UI has loading, empty, and failure states. Game input is ignored while an
