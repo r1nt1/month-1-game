@@ -16,6 +16,7 @@ button { cursor: pointer; border: 1px solid #ffffff26; border-radius: 6px; backg
 button:hover { background: #ffbf00; }
 button:focus-visible { outline: 3px solid #ffbf00; outline-offset: 5px; }
 #title { transition: opacity .3s; }
+#title h1 { margin-bottom: 12px; }
 #title.fading { opacity: 0; pointer-events: none; }
 #paused, #gameover, #error { padding: 24px; border-radius: 12px; background: #191920ed; }
 #paused h1, #gameover h1, #error h1 { font-size: 52px; }

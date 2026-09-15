@@ -24,7 +24,9 @@ scene.add(light);
 const geometry = new BoxGeometry(1, 1, 1);
 const palette = ['#FFBF00', '#FF7F00', '#FF4040', '#D000A0', '#8A2BE2', '#4169E1', '#0000FF'].map(c => new Color(c));
 const height = .65;
-const distance = 7;
+// Keep the full incoming block visible in the closer phone framing.
+const distance = 3.5;
+const framingMagnification = 1.25;
 type Block = Mesh<BoxGeometry, MeshLambertMaterial>;
 let top: Block;
 let moving: Block | null = null;
@@ -155,7 +157,7 @@ function resize() {
   const width = window.innerWidth;
   const viewHeight = window.innerHeight;
   const aspect = width / viewHeight;
-  const halfHeight = Math.max(7, 6 / aspect);
+  const halfHeight = Math.max(7, 6 / aspect) / framingMagnification;
   camera.left = -halfHeight * aspect;
   camera.right = halfHeight * aspect;
   camera.top = halfHeight;
