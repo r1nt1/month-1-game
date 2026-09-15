@@ -10,6 +10,8 @@ let paused = false;
 let fading = false;
 let fadeRemaining = 0;
 let score = 0;
+let gameOverElapsed = 0;
+const restartInputDelay = 0.5;
 let renderer: WebGLRenderer;
 const scene = new Scene();
 scene.background = new Color('#191920');
@@ -91,6 +93,7 @@ function resume() { paused = false; show(); }
 function lose() {
   if (moving) { falling.push({ mesh: moving, velocity: 0, age: 0 }); moving = null; }
   state = 'gameover';
+  gameOverElapsed = 0;
   element('final-score').textContent = String(score);
   show('gameover');
 }
@@ -128,12 +131,22 @@ function primary() {
     fading = true;
     fadeRemaining = .3;
     element('title').classList.add('fading');
-  } else if (state === 'gameover') begin();
+  } else if (state === 'gameover') {
+    // Discard early inputs; never queue a restart for after the delay.
+    if (gameOverElapsed >= restartInputDelay) begin();
+  }
   else if (paused) resume();
   else place();
 }
 element('start').addEventListener('click', primary);
-element('restart').addEventListener('click', () => { if (state === 'gameover') primary(); });
+element('restart').addEventListener('pointerdown', event => {
+  if (event.button === 0 && event.isPrimary && state === 'gameover') primary();
+});
+element('restart').addEventListener('click', event => {
+  // Pointer input is handled on press, so a late release cannot restart.
+  // Keep keyboard/assistive activation of the button available.
+  if (event.detail === 0 && state === 'gameover') primary();
+});
 element('resume').addEventListener('click', () => { if (paused) primary(); });
 element('retry').addEventListener('click', () => location.reload());
 document.addEventListener('pointerdown', event => {
@@ -172,6 +185,7 @@ function frame(now: number) {
   const dt = Math.min((now - previous) / 1000, .05);
   previous = now;
   if (state === 'error') return;
+  if (state === 'gameover' && !document.hidden) gameOverElapsed += dt;
   if (fading && !document.hidden) {
     fadeRemaining -= dt;
     if (fadeRemaining <= 0) { begin(); if (!document.hasFocus()) pause(); }

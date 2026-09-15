@@ -1,8 +1,6 @@
 /** Seconds from appearance to alignment; the first moving block is number 1. */
 export function travelTime(blockNumber: number): number {
-  if (blockNumber <= 10) return 1;
-  if (blockNumber <= 20) return 0.75;
-  return 0.5;
+  return Math.max(0.75, 1 - (blockNumber - 1) * 0.01);
 }
 
 export function overlap(center: number, target: number, size: number) {
