@@ -15,6 +15,7 @@ let runNumber = 0;
 let authVersion = 0;
 let boardVersion = 0;
 let busy = false;
+let justRegistered = false;
 
 function message(text: string) { node('auth-message').textContent = text; }
 function screen(id: string) {
@@ -22,12 +23,13 @@ function screen(id: string) {
 }
 function busyForm(value: boolean) {
   busy = value;
-  node('account-dialog').querySelectorAll<HTMLButtonElement>('button[type="submit"], #google-sign-in, #account-play').forEach(button => {
+  node('account-dialog').querySelectorAll<HTMLButtonElement>('button[type="submit"], #google-sign-in, #account-play, #sign-out').forEach(button => {
     button.disabled = value || ((!client || !googleReady) && button.id === 'google-sign-in');
   });
 }
 function renderAccount() {
-  node('account-play').hidden = !player;
+  node('account-play').hidden = !player || !justRegistered;
+  node('sign-out').hidden = !player || justRegistered;
   node('account-footnote').textContent = player ? '' : 'You can close this window and play as a guest.';
   node('account-button').textContent = player ? player.display_name : session ? 'Choose a name' : 'Sign in';
   if (player) {
@@ -71,6 +73,7 @@ async function signInWithGoogle() {
   }
 }
 async function openAccount() {
+  justRegistered = false;
   node<HTMLDialogElement>('account-dialog').showModal();
   if (!client) { screen('google-panel'); message('Sign-in is not configured yet. You can still play as a guest.'); return; }
   await loadPlayer(session);
@@ -155,6 +158,7 @@ export function initAccounts(onPlay: () => void) {
       }
       if (session?.user.id !== owner) return;
       player = data as Player;
+      justRegistered = true;
       renderAccount();
       message('You’re ready. Your next game will save your score.');
     } catch { message('Could not save your name. Please try again.'); }
@@ -164,6 +168,18 @@ export function initAccounts(onPlay: () => void) {
     if (!player || busy) return;
     node<HTMLDialogElement>('account-dialog').close();
     onPlay();
+  });
+  node('sign-out').addEventListener('click', async () => {
+    if (!client || busy || !player) return;
+    busyForm(true);
+    try {
+      const { error } = await client.auth.signOut({ scope: 'local' });
+      if (error) throw error;
+      justRegistered = false;
+      await loadPlayer(null);
+      message('Signed out. You can keep playing as a guest.');
+    } catch { message('Could not sign out. Please try again.'); }
+    finally { busyForm(false); }
   });
   if (client) {
     client.auth.onAuthStateChange((_event, current) => {

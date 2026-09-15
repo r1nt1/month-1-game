@@ -23,7 +23,7 @@
       <p class="eyebrow">YOUR PLACE IN THE STACK</p><h2 id="account-heading">Your account</h2>
       <div id="google-panel"><button id="google-sign-in" type="button">Continue with Google</button><p>Use your Google account to save your best score. No new password needed.</p></div>
       <form id="name-form" hidden><label for="display-name">Choose your display name</label><input id="display-name" autocomplete="nickname" required><p>This name is public and permanent. Names cannot be repeated, even with different capitalization.</p><button type="submit">Accept</button></form>
-      <div id="profile-panel" hidden><h3 id="player-name"></h3><p>Your best score: <strong id="player-best">0</strong></p></div><button id="account-play" hidden>Let’s play</button>
+      <div id="profile-panel" hidden><h3 id="player-name"></h3><p>Your best score: <strong id="player-best">0</strong></p></div><button id="account-play" hidden>Let’s play</button><button id="sign-out" hidden>Sign out</button>
       <p id="auth-message" role="status" aria-live="polite"></p><p id="account-footnote" class="muted"></p>
     </dialog>
     <dialog id="leaderboard-dialog" data-ui aria-labelledby="leaderboard-heading"><button class="close" data-close-dialog aria-label="Close leaderboard">×</button><p class="eyebrow">THE HIGHEST STACKS</p><h2 id="leaderboard-heading">Top 5 players</h2><p id="leaderboard-message" role="status"></p><ol id="leaderboard-list"></ol><button id="board-retry" hidden>Try again</button><p class="muted">One best score per player. Equal scores are ordered by name.</p></dialog>
