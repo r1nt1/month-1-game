@@ -33,6 +33,14 @@ type Block = Mesh<BoxGeometry, MeshLambertMaterial>;
 let top: Block;
 let moving: Block | null = null;
 let axis: 'x' | 'z' = 'x';
+let startSide = -1;
+// Screen-space order with the existing fixed isometric camera.
+const entrances: { axis: 'x' | 'z'; side: number }[] = [
+  { axis: 'z', side: -1 }, // top right
+  { axis: 'x', side: -1 }, // top left
+  { axis: 'x', side: 1 }, // bottom right
+  { axis: 'z', side: 1 }, // bottom left
+];
 let elapsed = 0;
 let settling = 0;
 const falling: { mesh: Block; velocity: number; age: number }[] = [];
@@ -72,9 +80,11 @@ function resetTower() {
   element('score').textContent = '0';
 }
 function spawn() {
-  axis = score % 2 === 0 ? 'x' : 'z';
+  const entrance = entrances[score % entrances.length];
+  axis = entrance.axis;
+  startSide = entrance.side;
   moving = block(top.scale.x, top.scale.z, top.position.x, top.position.y + height, top.position.z, colorAt(score + 1));
-  moving.position[axis] -= distance;
+  moving.position[axis] += startSide * distance;
   elapsed = 0;
 }
 function begin() {
@@ -201,8 +211,8 @@ function frame(now: number) {
     if (state === 'playing') {
       if (moving) {
         elapsed += dt;
-        moving.position[axis] = top.position[axis] - distance + distance * elapsed / travelTime(score + 1);
-        if (moving.position[axis] >= top.position[axis] + top.scale[axis]) lose();
+        moving.position[axis] = top.position[axis] + startSide * distance * (1 - elapsed / travelTime(score + 1));
+        if (startSide * (moving.position[axis] - top.position[axis]) <= -top.scale[axis]) lose();
       } else {
         settling -= dt;
         if (settling <= 0) spawn();
