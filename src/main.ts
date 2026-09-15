@@ -151,6 +151,16 @@ element('restart').addEventListener('click', event => {
   // Keep keyboard/assistive activation of the button available.
   if (event.detail === 0 && state === 'gameover') primary();
 });
+element('menu').addEventListener('click', () => {
+  if (state !== 'gameover') return;
+  state = 'title';
+  paused = false;
+  fading = false;
+  element('title').classList.remove('fading');
+  resetTower();
+  show('title');
+  element('start').focus();
+});
 element('resume').addEventListener('click', () => { if (paused) primary(); });
 element('retry').addEventListener('click', () => location.reload());
 document.addEventListener('pointerdown', event => {
@@ -215,7 +225,9 @@ function frame(now: number) {
   }
   renderer.render(scene, camera);
 }
-initAccounts();
+initAccounts(() => {
+  if (state === 'title' || state === 'gameover') begin();
+});
 try {
   renderer = new WebGLRenderer({ canvas, antialias: true });
   resize();

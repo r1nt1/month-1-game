@@ -22,13 +22,13 @@ function screen(id: string) {
 }
 function busyForm(value: boolean) {
   busy = value;
-  node('account-dialog').querySelectorAll<HTMLButtonElement>('button[type="submit"], #google-sign-in, #sign-out').forEach(button => {
+  node('account-dialog').querySelectorAll<HTMLButtonElement>('button[type="submit"], #google-sign-in, #account-play').forEach(button => {
     button.disabled = value || ((!client || !googleReady) && button.id === 'google-sign-in');
   });
 }
 function renderAccount() {
-  node('sign-out').hidden = !session;
-  node('account-footnote').textContent = player ? 'Your name is permanent. Scores are saved when your game ends.' : 'You can close this window and play as a guest.';
+  node('account-play').hidden = !player;
+  node('account-footnote').textContent = player ? '' : 'You can close this window and play as a guest.';
   node('account-button').textContent = player ? player.display_name : session ? 'Choose a name' : 'Sign in';
   if (player) {
     screen('profile-panel');
@@ -129,7 +129,7 @@ async function loadBoard() {
   }
 }
 
-export function initAccounts() {
+export function initAccounts(onPlay: () => void) {
   busyForm(false);
   node('account-button').addEventListener('click', () => { void openAccount(); });
   document.querySelectorAll('[data-open-board]').forEach(button => button.addEventListener('click', () => {
@@ -160,16 +160,10 @@ export function initAccounts() {
     } catch { message('Could not save your name. Please try again.'); }
     finally { busyForm(false); }
   });
-  node('sign-out').addEventListener('click', async () => {
-    if (!client || busy) return;
-    busyForm(true);
-    try {
-      const {error} = await client.auth.signOut({scope:'local'});
-      if (error) throw error;
-      await loadPlayer(null);
-      message('Signed out. You can keep playing as a guest.');
-    } catch {message('Could not sign out. Please try again.');}
-    finally {busyForm(false);}
+  node('account-play').addEventListener('click', () => {
+    if (!player || busy) return;
+    node<HTMLDialogElement>('account-dialog').close();
+    onPlay();
   });
   if (client) {
     client.auth.onAuthStateChange((_event, current) => {
