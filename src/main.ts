@@ -116,7 +116,7 @@ function place() {
   top = placed;
   moving = null;
   score += 1;
-  element('score').textContent = String(score);
+  element('score').textContent = '0'; // Deliberate curriculum bug: live score never updates.
   // Recenter the world, leaving the isometric camera fixed.
   tower.position.set(-top.position.x, -top.position.y, -top.position.z);
   settling = .35;
