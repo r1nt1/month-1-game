@@ -29,3 +29,28 @@ kbd { font: inherit; }
 @media (prefers-reduced-motion: reduce) { #title { transition: none; } }
 
 @media (max-height: 500px) { #overlay { padding-top: 16px; } #title h1 { font-size: 40px; margin: 8px 0 12px; } #title .eyebrow { display: none; } #title p { margin: 8px 0; } }
+
+#account-actions { pointer-events: auto; display: flex; gap: 8px; margin-left: auto; }
+#account-actions button { padding: 8px 14px; min-height: 40px; font-size: 12px; }
+#account-button { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#counter { margin-left: 16px; }
+button.quiet { color: #eee7dd; background: transparent; padding: 12px; }
+button:disabled { cursor: wait; opacity: .5; }
+#gameover .quiet { display: block; margin: 8px auto 0; }
+#gameover { max-height: calc(100dvh - 48px); overflow-y: auto; }
+#save-status { max-width: 280px; }
+dialog { width: min(420px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto; border: 1px solid #ffffff18; border-radius: 14px; padding: 32px; background: #202027; color: #faf5ed; box-shadow: 0 24px 80px #0008; }
+dialog::backdrop { background: #000b; }
+dialog h2 { font-size: 30px; letter-spacing: -.04em; margin: 12px 0 24px; }
+dialog h3 { overflow-wrap: anywhere; }
+dialog .close { position: absolute; right: 10px; top: 8px; padding: 0; width: 40px; min-height: 40px; background: transparent; color: #ddd; border: none; font-size: 24px; }
+dialog form { display: grid; gap: 12px; }
+dialog label { font-size: 13px; color: #e1dce7; text-align: left; }
+dialog input { width: 100%; padding: 13px; border: 1px solid #ffffff40; border-radius: 6px; background: #15151b; color: #faf5ed; font: inherit; font-size: 16px; }
+dialog input:focus-visible { outline: 2px solid #ffbf00; outline-offset: 2px; }
+dialog p { overflow-wrap: anywhere; }
+.muted { color: #aaa3b2; font-size: 11px; }
+#leaderboard-list { padding-left: 22px; }
+#leaderboard-list li { padding: 14px 0 14px 8px; border-bottom: 1px solid #ffffff15; }
+#leaderboard-list li span { display: inline-block; max-width: 75%; overflow-wrap: anywhere; vertical-align: top; }
+#leaderboard-list strong { float: right; color: #ffbf00; font-variant-numeric: tabular-nums; }

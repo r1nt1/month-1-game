@@ -1,5 +1,6 @@
 import { BoxGeometry, Color, DirectionalLight, Group, Mesh, MeshLambertMaterial, OrthographicCamera, Scene, WebGLRenderer } from 'three';
 import { overlap, travelTime } from './rules';
+import { accounts, initAccounts } from './accounts';
 
 const element = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const canvas = element<HTMLCanvasElement>('scene');
@@ -38,6 +39,7 @@ let settling = 0;
 const falling: { mesh: Block; velocity: number; age: number }[] = [];
 
 function show(panel?: string) {
+  accounts.setScreen(state === 'title' || state === 'gameover');
   for (const id of panels) element(id).hidden = id !== panel;
   element('overlay').classList.toggle('score-focus', panel === 'gameover');
   element('counter').hidden = state === 'loading' || state === 'error' || state === 'title';
@@ -78,6 +80,7 @@ function spawn() {
   elapsed = 0;
 }
 function begin() {
+  accounts.startRun();
   resetTower();
   paused = false;
   fading = false;
@@ -96,6 +99,7 @@ function lose() {
   gameOverElapsed = 0;
   element('final-score').textContent = String(score);
   show('gameover');
+  void accounts.finishRun(score);
 }
 function place() {
   if (!moving) return;
@@ -126,7 +130,7 @@ function place() {
   }
 }
 function primary() {
-  if (fading || state === 'loading' || state === 'error') return;
+  if (accounts.isOpen() || fading || state === 'loading' || state === 'error') return;
   if (state === 'title') {
     fading = true;
     fadeRemaining = .3;
@@ -150,12 +154,12 @@ element('restart').addEventListener('click', event => {
 element('resume').addEventListener('click', () => { if (paused) primary(); });
 element('retry').addEventListener('click', () => location.reload());
 document.addEventListener('pointerdown', event => {
-  if (event.button !== 0 || !event.isPrimary || (event.target as HTMLElement).closest('button')) return;
+  if (event.button !== 0 || !event.isPrimary || (event.target as HTMLElement).closest('button, [data-ui]')) return;
   primary();
 });
 document.addEventListener('keydown', event => {
   if (event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
-  if (event.key !== ' ') return;
+  if (event.key !== ' ' || (event.target as HTMLElement).closest('[data-ui]')) return;
   event.preventDefault();
   primary();
 });
@@ -211,6 +215,7 @@ function frame(now: number) {
   }
   renderer.render(scene, camera);
 }
+initAccounts();
 try {
   renderer = new WebGLRenderer({ canvas, antialias: true });
   resize();
