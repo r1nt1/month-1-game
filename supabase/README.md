@@ -1,6 +1,6 @@
 # Accounts and leaderboard
 
-The game uses Supabase Auth for email sign-in and Postgres for player records.
+The game uses Supabase Auth for Google sign-in and Postgres for player records.
 `players` has only `player_id`, `display_name`, and `best_score`. Emails stay in
 Supabase Auth. Names are permanent and unique without regard to letter case.
 The public leaderboard exposes five names and scores, ordered by score and then
@@ -19,30 +19,38 @@ it does not prevent a technically skilled player from submitting an invented sco
 The browser calls score submission only when a game ends, for the player signed
 in when that run started. Failed saves are reported and are not queued.
 
-## Email setup still required
+## Google setup still required
 
-The dashboard currently requires custom SMTP (an email delivery service) to edit
-the default sign-in-link template. Configure a sender, then change the relevant
-sign-in/confirmation email templates to display `{{ .Token }}` as a code instead
-of a confirmation link. Verify both a new account and a returning account.
+Create a Google Cloud project and a Web application OAuth client (the credentials
+that identify this game to Google). Use only basic identity scopes: openid, email,
+and profile. Configure this Supabase callback in Google's authorized redirect URIs:
+
+`https://urfjdqvcoxvdckpaldcn.supabase.co/auth/v1/callback`
+
+Put the Google client ID and secret in Supabase's Google provider settings, never
+in frontend code. Add each game return URL to Supabase's redirect allow list:
+`http://127.0.0.1:5181/?auth=google`, `http://localhost:5181/?auth=google`, and the
+exact deployed Vercel game URL with `/?auth=google` when deployment is approved.
+A phone needs its reachable LAN or deployed URL explicitly allowed too.
+Google test mode may require adding test users before they can sign in.
 
 Local configuration in `.env.local`:
 
 ```dotenv
 VITE_SUPABASE_URL=your-project-url
 VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
-VITE_EMAIL_CODES_READY=false
+VITE_GOOGLE_AUTH_READY=false
 ```
 
-Only change the last value to `true` after email templates and delivery are ready.
-The app deliberately blocks code requests until then. Never put a secret or
-service-role key into a VITE variable: those values are included in the browser.
-Set the same public values in Vercel when deployment is approved.
+Only change the last value to `true` after Google and Supabase are configured.
+Never put a secret or service-role key into a VITE variable: those values are
+included in the browser. Set the same public values in Vercel when deployment is
+approved. Email delivery is not used by this sign-in flow.
 
-Before release, test code delivery, invalid/expired codes, a duplicate name,
-sign-out, score saving, and the top-five list with real accounts. Live email tests
-have not yet been performed. Build/type/lint/audit checks and transactional
-database checks do not replace those tests.
+Before release, test Google sign-in and cancellation, choosing a permanent name,
+a duplicate name, sign-out, score saving, and the top-five list with real accounts.
+Live Google sign-in has not yet been tested: Google Cloud account setup is pending.
+Build/type/lint/audit checks and database tests do not replace those tests.
 
 The UI has loading, empty, and failure states. Game input is ignored while an
 account or leaderboard dialog is open. Supabase keeps the authentication session

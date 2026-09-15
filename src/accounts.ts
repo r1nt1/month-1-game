@@ -6,25 +6,24 @@ type Player = { player_id: string; display_name: string; best_score: number };
 const url = import.meta.env.VITE_SUPABASE_URL;
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const client = url && key ? createClient(url, key) : null;
-const emailCodesReady = import.meta.env.VITE_EMAIL_CODES_READY === 'true';
+const googleReady = import.meta.env.VITE_GOOGLE_AUTH_READY === 'true';
+let authReturn = new URL(window.location.href).searchParams.get('auth') === 'google';
 let session: Session | null = null;
 let player: Player | null = null;
 let runOwner: string | null = null;
 let runNumber = 0;
 let authVersion = 0;
 let boardVersion = 0;
-let email = '';
 let busy = false;
-let nextCodeAt = 0;
 
 function message(text: string) { node('auth-message').textContent = text; }
 function screen(id: string) {
-  for (const part of ['email-form', 'code-form', 'name-form', 'profile-panel']) node(part).hidden = part !== id;
+  for (const part of ['google-panel', 'name-form', 'profile-panel']) node(part).hidden = part !== id;
 }
 function busyForm(value: boolean) {
   busy = value;
-  node('account-dialog').querySelectorAll<HTMLButtonElement>('button[type="submit"], #resend-code, #sign-out').forEach(button => {
-    button.disabled = value || ((!client || !emailCodesReady) && Boolean(button.closest('#email-form, #code-form')));
+  node('account-dialog').querySelectorAll<HTMLButtonElement>('button[type="submit"], #google-sign-in, #sign-out').forEach(button => {
+    button.disabled = value || ((!client || !googleReady) && button.id === 'google-sign-in');
   });
 }
 function renderAccount() {
@@ -35,7 +34,7 @@ function renderAccount() {
     screen('profile-panel');
     node('player-name').textContent = player.display_name;
     node('player-best').textContent = String(player.best_score);
-  } else screen(session ? 'name-form' : 'email-form');
+  } else screen(session ? 'name-form' : 'google-panel');
 }
 async function loadPlayer(current: Session | null) {
   const version = ++authVersion;
@@ -56,29 +55,26 @@ async function loadPlayer(current: Session | null) {
     if (version === authVersion) message('Could not load your player. Close and reopen this window to retry.');
   } finally { if (version === authVersion) busyForm(false); }
 }
-async function sendCode() {
-  if (!emailCodesReady) { message('Email sign-in is being set up. You can still play as a guest.'); return; }
-  if (!client || busy) return;
-  if (Date.now() < nextCodeAt) { message('Please wait a minute before requesting another code.'); return; }
+async function signInWithGoogle() {
+  if (!client || !googleReady || busy) return;
   busyForm(true);
-  message('Sending your code…');
+  message('Opening Google…');
   try {
-    const { error } = await client.auth.signInWithOtp({ email });
+    const { error } = await client.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}${window.location.pathname}?auth=google` },
+    });
     if (error) throw error;
-    nextCodeAt = Date.now() + 60000;
-    screen('code-form');
-    node('code-destination').textContent = email;
-    message('Check your email for your sign-in code.');
-    node<HTMLInputElement>('login-code').focus();
   } catch {
-    message('Could not send a code. Check the address and try again shortly.');
-  } finally { busyForm(false); }
+    message('Could not open Google sign-in. Please try again.');
+    busyForm(false);
+  }
 }
 async function openAccount() {
   node<HTMLDialogElement>('account-dialog').showModal();
-  if (!client) { screen('email-form'); message('Sign-in is not configured yet. You can still play as a guest.'); return; }
+  if (!client) { screen('google-panel'); message('Sign-in is not configured yet. You can still play as a guest.'); return; }
   await loadPlayer(session);
-  if (!emailCodesReady && !session) message('Email sign-in is being set up. You can still play as a guest.');
+  if (!googleReady && !session) message('Google sign-in is being connected. You can still play as a guest.');
 }
 export const accounts = {
   isOpen: () => Boolean(document.querySelector('dialog[open]')),
@@ -142,26 +138,7 @@ export function initAccounts() {
   }));
   document.querySelectorAll<HTMLButtonElement>('[data-close-dialog]').forEach(button => button.addEventListener('click', () => button.closest('dialog')?.close()));
   node('board-retry').addEventListener('click', () => { void loadBoard(); });
-  node('email-form').addEventListener('submit', event => {
-    event.preventDefault();
-    email = node<HTMLInputElement>('login-email').value.trim();
-    void sendCode();
-  });
-  node('resend-code').addEventListener('click', () => { void sendCode(); });
-  node('change-email').addEventListener('click', () => { if (!busy) {screen('email-form'); message('');} });
-  node('code-form').addEventListener('submit', async event => {
-    event.preventDefault();
-    if (!client || busy) return;
-    busyForm(true);
-    message('Checking your code…');
-    try {
-      const { data, error } = await client.auth.verifyOtp({ email, token: node<HTMLInputElement>('login-code').value.trim(), type: 'email' });
-      if (error || !data.session) throw error;
-      node<HTMLInputElement>('login-code').value = '';
-      await loadPlayer(data.session);
-    } catch { message('That code is invalid or expired. Try again or request a new one.'); }
-    finally { busyForm(false); }
-  });
+  node('google-sign-in').addEventListener('click', () => { void signInWithGoogle(); });
   node('name-form').addEventListener('submit', async event => {
     event.preventDefault();
     if (!client || !session || busy) return;
@@ -197,7 +174,15 @@ export function initAccounts() {
   if (client) {
     client.auth.onAuthStateChange((_event, current) => {
       // Database requests must run after Supabase releases its auth callback lock.
-      setTimeout(() => { void loadPlayer(current); }, 0);
+      setTimeout(async () => {
+        await loadPlayer(current);
+        if (authReturn && (current || _event === 'INITIAL_SESSION')) {
+          authReturn = false;
+          window.history.replaceState(null, '', window.location.pathname);
+          node<HTMLDialogElement>('account-dialog').showModal();
+          if (!current) message('Sign-in was not completed. Try Google again or play as a guest.');
+        }
+      }, 0);
     });
   }
 }

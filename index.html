@@ -21,8 +21,7 @@
     <dialog id="account-dialog" data-ui aria-labelledby="account-heading">
       <button class="close" data-close-dialog aria-label="Close account">×</button>
       <p class="eyebrow">YOUR PLACE IN THE STACK</p><h2 id="account-heading">Your account</h2>
-      <form id="email-form"><label for="login-email">Email address</label><input id="login-email" type="email" autocomplete="email" required><button type="submit">Send a code</button><p>No password. We’ll email you a sign-in code.</p></form>
-      <form id="code-form" hidden><p>Enter the code sent to <span id="code-destination"></span></p><label for="login-code">Email code</label><input id="login-code" inputmode="numeric" autocomplete="one-time-code" required pattern="[0-9]+"><button type="submit">Sign in</button><button type="button" class="quiet" id="resend-code">Send another code</button><button type="button" class="quiet" id="change-email">Use another email</button></form>
+      <div id="google-panel"><button id="google-sign-in" type="button">Continue with Google</button><p>Use your Google account to save your best score. No new password needed.</p></div>
       <form id="name-form" hidden><label for="display-name">Choose your display name</label><input id="display-name" autocomplete="nickname" required><p>This name is public and permanent. Names cannot be repeated, even with different capitalization.</p><button type="submit">Keep this name</button></form>
       <div id="profile-panel" hidden><h3 id="player-name"></h3><p>Your best score: <strong id="player-best">0</strong></p></div><button id="sign-out" hidden>Sign out</button>
       <p id="auth-message" role="status" aria-live="polite"></p><p id="account-footnote" class="muted"></p>
