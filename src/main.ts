@@ -1,4 +1,4 @@
-import { BoxGeometry, Color, DirectionalLight, Group, Mesh, MeshLambertMaterial, OrthographicCamera, Scene, WebGLRenderer } from 'three';
+import { BoxGeometry, Color, DirectionalLight, Group, Mesh, MeshLambertMaterial, OrthographicCamera, Scene, Vector3, WebGLRenderer } from 'three';
 import { overlap, travelTime } from './rules';
 import { accounts, initAccounts } from './accounts';
 
@@ -44,6 +44,25 @@ function show(panel?: string) {
   element('overlay').classList.toggle('score-focus', panel === 'gameover');
   element('counter').hidden = state === 'loading' || state === 'error' || state === 'title';
   element('instructions').hidden = state !== 'playing' || paused || fading;
+  layoutTitle();
+}
+// Place the menu around the base block without changing the gameplay camera.
+function layoutTitle() {
+  const isTitle = state === 'title';
+  element('overlay').classList.toggle('title-layout', isTitle);
+  if (!isTitle) return;
+  const viewportHeight = window.innerHeight;
+  camera.updateMatrixWorld();
+  const projectedY: number[] = [];
+  for (const x of [-1.5, 1.5]) for (const y of [-height / 2, height / 2]) for (const z of [-1.5, 1.5]) {
+    projectedY.push(new Vector3(x, y, z).project(camera).y);
+  }
+  const blockTop = (1 - Math.max(...projectedY)) * viewportHeight / 2;
+  const blockBottom = (1 - Math.min(...projectedY)) * viewportHeight / 2;
+  const gap = viewportHeight <= 500 ? 12 : 24;
+  const heading = element('title-heading');
+  heading.style.top = `${blockTop - gap - heading.getBoundingClientRect().height}px`;
+  element('title-actions').style.top = `${blockBottom + gap}px`;
 }
 function fail(message: string) {
   state = 'error';
@@ -189,6 +208,7 @@ function resize() {
   camera.updateProjectionMatrix();
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.setSize(width, viewHeight, false);
+  layoutTitle();
 }
 canvas.addEventListener('webglcontextlost', event => {
   event.preventDefault();

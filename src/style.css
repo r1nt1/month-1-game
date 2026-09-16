@@ -54,3 +54,10 @@ dialog p { overflow-wrap: anywhere; }
 #leaderboard-list li { padding: 14px 0 14px 8px; border-bottom: 1px solid #ffffff15; }
 #leaderboard-list li span { display: inline-block; max-width: 75%; overflow-wrap: anywhere; vertical-align: top; }
 #leaderboard-list strong { float: right; color: #ffbf00; font-variant-numeric: tabular-nums; }
+
+#overlay.title-layout { padding: 0; }
+#overlay.title-layout #title { position: absolute; inset: 0; max-width: none; pointer-events: none; }
+#title-heading, #title-actions { position: absolute; left: 50%; transform: translateX(-50%); width: calc(100% - 48px); max-width: 440px; }
+#title-actions { pointer-events: auto; }
+#title.fading #title-actions { pointer-events: none; }
+#title-heading h1 { margin-bottom: 0; }
